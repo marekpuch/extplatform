@@ -1,0 +1,64 @@
+---
+- name: Refuse deployment until at least one basic auth user is configured
+  ansible.builtin.assert:
+    that:
+      - openresty_basic_auth_users | length > 0
+    fail_msg: >-
+      Define openresty_basic_auth_users in inventory/host_vars/ext_ovh_vps.yml
+      before running playbooks/openresty.yml.
+
+- name: Ensure OpenResty compose project directories exist
+  ansible.builtin.file:
+    path: "{{ openresty_compose_project_dir }}/{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - ""
+    - conf
+    - auth
+    - html
+
+- name: Deploy OpenResty docker compose stack
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ openresty_compose_project_dir }}/docker-compose.yml"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Deploy OpenResty nginx config
+  ansible.builtin.template:
+    src: default.conf.j2
+    dest: "{{ openresty_compose_project_dir }}/conf/default.conf"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Deploy OpenResty basic auth file
+  ansible.builtin.copy:
+    dest: "{{ openresty_compose_project_dir }}/auth/users.htpasswd"
+    content: "{{ openresty_basic_auth_users | join('\n') ~ '\n' }}"
+    owner: root
+    group: root
+    mode: "0640"
+
+- name: Deploy OpenResty index page
+  ansible.builtin.template:
+    src: index.html.j2
+    dest: "{{ openresty_compose_project_dir }}/html/index.html"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Start OpenResty stack with docker compose
+  ansible.builtin.command:
+    cmd: docker compose up -d
+    chdir: "{{ openresty_compose_project_dir }}"
+  register: openresty_compose_up
+  changed_when: >-
+    'Creating' in openresty_compose_up.stdout or
+    'Recreating' in openresty_compose_up.stdout or
+    'Starting' in openresty_compose_up.stdout or
+    'Pulling' in openresty_compose_up.stdout

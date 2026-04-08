@@ -1,0 +1,10 @@
+---
+- name: Configure external OVH VPS
+  hosts: ovh_vps
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: ssh_hardening
+    - role: fail2ban
+    - role: docker

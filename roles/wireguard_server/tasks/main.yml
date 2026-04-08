@@ -1,0 +1,89 @@
+---
+- name: Install WireGuard
+  ansible.builtin.apt:
+    name: wireguard
+    state: present
+    update_cache: true
+
+- name: Ensure WireGuard configuration directory exists
+  ansible.builtin.file:
+    path: "{{ wireguard_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Check whether WireGuard private key exists
+  ansible.builtin.stat:
+    path: "{{ wireguard_private_key_path }}"
+  register: wireguard_private_key_stat
+
+- name: Generate WireGuard private key if missing
+  ansible.builtin.shell: |
+    umask 077
+    wg genkey > {{ wireguard_private_key_path }}
+  args:
+    creates: "{{ wireguard_private_key_path }}"
+  when: not wireguard_private_key_stat.stat.exists
+
+- name: Check whether WireGuard public key exists
+  ansible.builtin.stat:
+    path: "{{ wireguard_public_key_path }}"
+  register: wireguard_public_key_stat
+
+- name: Generate WireGuard public key if missing
+  ansible.builtin.shell: |
+    umask 077
+    wg pubkey < {{ wireguard_private_key_path }} > {{ wireguard_public_key_path }}
+  args:
+    creates: "{{ wireguard_public_key_path }}"
+  when: not wireguard_public_key_stat.stat.exists
+
+- name: Read WireGuard private key
+  ansible.builtin.slurp:
+    src: "{{ wireguard_private_key_path }}"
+  register: wireguard_private_key_raw
+
+- name: Read WireGuard public key
+  ansible.builtin.slurp:
+    src: "{{ wireguard_public_key_path }}"
+  register: wireguard_public_key_raw
+
+- name: Persist IPv4 forwarding setting
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: "{{ '1' if wireguard_enable_ipv4_forwarding else '0' }}"
+    sysctl_set: true
+    state: present
+    reload: true
+  when: wireguard_enable_ipv4_forwarding is not none
+
+- name: Persist IPv6 forwarding setting
+  ansible.posix.sysctl:
+    name: net.ipv6.conf.all.forwarding
+    value: "{{ '1' if wireguard_enable_ipv6_forwarding else '0' }}"
+    sysctl_set: true
+    state: present
+    reload: true
+  when: wireguard_enable_ipv6_forwarding is not none
+
+- name: Deploy WireGuard server configuration
+  ansible.builtin.template:
+    src: wg0.conf.j2
+    dest: "{{ wireguard_config_path }}"
+    owner: root
+    group: root
+    mode: "0600"
+  vars:
+    wireguard_private_key: "{{ wireguard_private_key_raw.content | b64decode | trim }}"
+  notify: Restart wireguard
+
+- name: Ensure WireGuard service is enabled and started
+  ansible.builtin.service:
+    name: "wg-quick@{{ wireguard_interface }}"
+    state: started
+    enabled: true
+
+- name: Expose WireGuard server public key
+  ansible.builtin.debug:
+    msg: "WireGuard server public key: {{ wireguard_public_key_raw.content | b64decode | trim }}"

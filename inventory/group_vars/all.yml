@@ -1,0 +1,10 @@
+---
+ubuntu_authorized_keys:
+  - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOCSj4cj5AYa43vO0uosfzpL/MJpd5pudBjr6BXBzpQj marek"
+  # Replace with one or more SSH public keys before the first run.
+  # - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA... your-key-comment"
+
+fail2ban_ignoreip:
+  - 127.0.0.1/8
+  - ::1
+  - 185.157.13.20

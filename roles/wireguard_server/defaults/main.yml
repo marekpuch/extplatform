@@ -1,0 +1,13 @@
+---
+wireguard_interface: wg0
+wireguard_config_dir: /etc/wireguard
+wireguard_address: 10.70.0.1/24
+wireguard_listen_port: 51820
+wireguard_private_key_path: "{{ wireguard_config_dir }}/privatekey"
+wireguard_public_key_path: "{{ wireguard_config_dir }}/publickey"
+wireguard_config_path: "{{ wireguard_config_dir }}/{{ wireguard_interface }}.conf"
+wireguard_enable_ipv4_forwarding: true
+wireguard_enable_ipv6_forwarding: false
+wireguard_enable_nat: true
+wireguard_nat_interface: "{{ ansible_default_ipv4.interface }}"
+wireguard_peers: []

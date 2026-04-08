@@ -1,0 +1,25 @@
+---
+docker_users:
+  - ubuntu
+
+openresty_compose_project_dir: /opt/compose/openresty-basic-auth
+# Add htpasswd-formatted entries before running playbooks/openresty.yml
+# - "admin:$apr1$example$examplehashedpassword"
+openresty_basic_auth_users: []
+
+wireguard_interface: wg0
+wireguard_address: 10.70.0.1/24
+wireguard_listen_port: 51820
+# Add peer definitions before running playbooks/wireguard.yml
+# - name: laptop
+#   public_key: "base64-wireguard-public-key"
+#   allowed_ips:
+#     - 10.70.0.2/32
+#   persistent_keepalive: 25
+wireguard_peers: []
+
+# GitHub Runner configuration
+github_runner_repo_url: ""
+# Provide either a registration token (short-lived) or a personal access token (PAT)
+github_runner_token: ""
+github_runner_access_token: ""

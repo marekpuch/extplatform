@@ -1,0 +1,8 @@
+[sshd]
+enabled = {{ 'true' if fail2ban_sshd_enabled else 'false' }}
+port = {{ fail2ban_sshd_port }}
+backend = {{ fail2ban_sshd_backend }}
+ignoreip = {{ fail2ban_ignoreip | join(' ') }}
+maxretry = {{ fail2ban_sshd_maxretry }}
+findtime = {{ fail2ban_sshd_findtime }}
+bantime = {{ fail2ban_sshd_bantime }}

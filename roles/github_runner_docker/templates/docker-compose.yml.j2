@@ -1,0 +1,23 @@
+---
+version: '3.8'
+services:
+  github-runner:
+    image: "{{ github_runner_image }}"
+    container_name: "github-runner"
+    restart: always
+    environment:
+      - "REPO_URL={{ github_runner_repo_url }}"
+      - "RUNNER_NAME={{ github_runner_name }}"
+      - "RUNNER_LABELS={{ github_runner_labels }}"
+{% if github_runner_token %}
+      - "RUNNER_TOKEN={{ github_runner_token }}"
+{% endif %}
+{% if github_runner_access_token %}
+      - "ACCESS_TOKEN={{ github_runner_access_token }}"
+{% endif %}
+{% for env in github_runner_extra_env %}
+      - "{{ env }}"
+{% endfor %}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/github-runner:/tmp/github-runner

@@ -1,0 +1,12 @@
+---
+fail2ban_service_name: fail2ban
+fail2ban_jail_path: /etc/fail2ban/jail.d/sshd.local
+fail2ban_sshd_enabled: true
+fail2ban_sshd_port: ssh
+fail2ban_sshd_backend: systemd
+fail2ban_sshd_maxretry: 5
+fail2ban_sshd_findtime: 10m
+fail2ban_sshd_bantime: 1h
+fail2ban_ignoreip:
+  - 127.0.0.1/8
+  - ::1

@@ -1,0 +1,52 @@
+---
+- name: Refuse to disable passwords until a public key is configured
+  ansible.builtin.assert:
+    that:
+      - ssh_hardening_authorized_keys | length > 0
+    fail_msg: >-
+      Define ubuntu_authorized_keys in inventory/group_vars/all.yml
+      before running this playbook.
+
+- name: Ensure OpenSSH server is installed
+  ansible.builtin.apt:
+    name: openssh-server
+    state: present
+    update_cache: true
+
+- name: Ensure the managed user's .ssh directory exists
+  ansible.builtin.file:
+    path: "/home/{{ ssh_hardening_authorized_user }}/.ssh"
+    state: directory
+    owner: "{{ ssh_hardening_authorized_user }}"
+    group: "{{ ssh_hardening_authorized_user }}"
+    mode: "0700"
+
+- name: Install the managed authorized keys
+  ansible.posix.authorized_key:
+    user: "{{ ssh_hardening_authorized_user }}"
+    state: present
+    key: "{{ ssh_hardening_authorized_keys | join('\n') }}"
+    exclusive: true
+    manage_dir: false
+
+- name: Ensure sshd drop-in directory exists
+  ansible.builtin.file:
+    path: "{{ ssh_hardening_config_path | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy SSH hardening drop-in
+  ansible.builtin.template:
+    src: 99-ansible-hardening.conf.j2
+    dest: "{{ ssh_hardening_config_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart ssh
+
+- name: Ensure SSH service is enabled
+  ansible.builtin.service:
+    name: "{{ ssh_hardening_service_name }}"
+    enabled: true

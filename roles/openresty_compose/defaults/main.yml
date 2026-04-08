@@ -1,0 +1,8 @@
+---
+openresty_compose_project_dir: /opt/compose/openresty-basic-auth
+openresty_compose_container_name: openresty-basic-auth
+openresty_compose_image: openresty/openresty:1.27.1.2-0-alpine
+openresty_compose_port: 80
+openresty_basic_auth_users: []
+openresty_html_index_title: OpenResty
+openresty_html_index_heading: OpenResty is running

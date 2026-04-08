@@ -1,0 +1,43 @@
+---
+- name: Refuse deployment until github_runner_repo_url is configured
+  ansible.builtin.assert:
+    that:
+      - github_runner_repo_url != ""
+    fail_msg: >-
+      Define github_runner_repo_url in inventory/host_vars/ext_ovh_vps.yml
+      before running playbooks/github_runner.yml.
+
+- name: Refuse deployment until github_runner_token or github_runner_access_token is configured
+  ansible.builtin.assert:
+    that:
+      - github_runner_token != "" or github_runner_access_token != ""
+    fail_msg: >-
+      Define github_runner_token or github_runner_access_token in inventory/host_vars/ext_ovh_vps.yml
+      before running playbooks/github_runner.yml.
+
+- name: Ensure GitHub Runner project directory exists
+  ansible.builtin.file:
+    path: "{{ github_runner_project_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy GitHub Runner docker compose stack
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ github_runner_project_dir }}/docker-compose.yml"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Start GitHub Runner stack with docker compose
+  ansible.builtin.command:
+    cmd: docker compose up -d
+    chdir: "{{ github_runner_project_dir }}"
+  register: github_runner_compose_up
+  changed_when: >-
+    'Creating' in github_runner_compose_up.stdout or
+    'Recreating' in github_runner_compose_up.stdout or
+    'Starting' in github_runner_compose_up.stdout or
+    'Pulling' in github_runner_compose_up.stdout

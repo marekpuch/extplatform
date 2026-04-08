@@ -1,0 +1,9 @@
+---
+- name: Configure GitHub Self-hosted Runner in Docker
+  hosts: ovh_vps
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: docker
+    - role: github_runner_docker

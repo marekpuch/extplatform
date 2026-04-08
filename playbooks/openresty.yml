@@ -1,0 +1,8 @@
+---
+- name: Deploy OpenResty basic auth stack
+  hosts: ovh_vps
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: openresty_compose
