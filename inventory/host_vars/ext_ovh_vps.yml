@@ -18,8 +18,3 @@ wireguard_listen_port: 51820
 #   persistent_keepalive: 25
 wireguard_peers: []
 
-# GitHub Runner configuration
-github_runner_repo_url: ""
-# Provide either a registration token (short-lived) or a personal access token (PAT)
-github_runner_token: ""
-github_runner_access_token: ""

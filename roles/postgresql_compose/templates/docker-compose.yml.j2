@@ -1,0 +1,21 @@
+---
+services:
+  postgresql:
+    image: {{ postgresql_image }}
+    container_name: {{ postgresql_container_name }}
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: {{ postgresql_db }}
+      POSTGRES_USER: {{ postgresql_user }}
+      POSTGRES_PASSWORD: {{ postgresql_password }}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - {{ postgresql_network_name }}
+
+volumes:
+  postgres_data:
+
+networks:
+  {{ postgresql_network_name }}:
+    external: true

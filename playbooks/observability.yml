@@ -5,7 +5,7 @@
   gather_facts: true
 
   vars_files:
-    - "../group_vars/secrets.yml"
+    - "../inventory/group_vars/secrets.yml"
 
   roles:
     - role: observability_compose

@@ -1,5 +1,5 @@
 ---
-- name: Deploy OpenResty basic auth stack
+- name: Deploy PostgreSQL stack
   hosts: ovh_vps
   become: true
   gather_facts: true
@@ -8,5 +8,4 @@
     - "../inventory/group_vars/secrets.yml"
 
   roles:
-    - role: cloudflared_tunnel
-    - role: openresty_compose
+    - role: postgresql_compose

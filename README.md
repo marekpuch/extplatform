@@ -17,10 +17,12 @@ The playbook enforces:
 - `playbooks/site.yml`: main entrypoint
 - `playbooks/openresty.yml`: deploy the OpenResty basic-auth compose stack
 - `playbooks/observability.yml`: deploy the Prometheus, Loki, and Grafana monitoring stack
+- `playbooks/postgresql.yml`: deploy the PostgreSQL database stack
 - `playbooks/wireguard.yml`: configure the WireGuard VPN server
 - `roles/ssh_hardening`: SSH key management and password-login hardening
 - `roles/fail2ban`: basic SSH brute-force protection
 - `roles/docker`: Docker installation and service setup
+- `roles/postgresql_compose`: deploy PostgreSQL in a private 'internal' network
 - `roles/cloudflared_tunnel`: deploy a Cloudflare Tunnel for secure access
 - `roles/openresty_compose`: deploy the OpenResty compose service
 - `roles/observability_compose`: deploy the metrics and logging stack
@@ -41,6 +43,7 @@ Example `inventory/host_vars/ext_ovh_vps.yml`:
 openresty_cloudflare_tunnel_token: "your-tunnel-token-here"
 openresty_basic_auth_users:
   - "user:$apr1$..."
+postgresql_password: "your-database-password-here"
 ```
 
 **Note on Cloudflare Tunnel**: Ensure that in the Cloudflare Dashboard, the tunnel's Public Hostname is configured to point to `http://openresty:80`.

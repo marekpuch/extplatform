@@ -1,0 +1,8 @@
+---
+postgresql_compose_project_dir: /opt/compose/postgresql
+postgresql_image: postgres:17-alpine
+postgresql_container_name: postgres
+postgresql_db: app_db
+postgresql_user: app_user
+postgresql_password: ""
+postgresql_network_name: internal

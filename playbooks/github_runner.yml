@@ -4,6 +4,9 @@
   become: true
   gather_facts: true
 
+  vars_files:
+    - "../inventory/group_vars/secrets.yml"
+
   roles:
     - role: docker
     - role: github_runner_docker

@@ -1,0 +1,39 @@
+---
+- name: Refuse deployment if PostgreSQL password is not configured
+  ansible.builtin.assert:
+    that:
+      - postgresql_password | length > 0
+    fail_msg: >-
+      Define postgresql_password in your secrets vault before running playbooks.
+
+- name: Ensure PostgreSQL project directory exists
+  ansible.builtin.file:
+    path: "{{ postgresql_compose_project_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Ensure PostgreSQL network exists
+  community.docker.docker_network:
+    name: "{{ postgresql_network_name }}"
+    state: present
+
+- name: Deploy PostgreSQL docker-compose stack
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ postgresql_compose_project_dir }}/docker-compose.yml"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Start PostgreSQL stack with docker compose
+  ansible.builtin.command:
+    cmd: docker compose up -d
+    chdir: "{{ postgresql_compose_project_dir }}"
+  register: postgresql_compose_up
+  changed_when: >-
+    'Creating' in postgresql_compose_up.stdout or
+    'Recreating' in postgresql_compose_up.stdout or
+    'Starting' in postgresql_compose_up.stdout or
+    'Pulling' in postgresql_compose_up.stdout
