@@ -11,6 +11,12 @@ server {
         try_files $uri $uri/ =404;
     }
 
+    location /health {
+        auth_basic off;
+        return 200 "OK";
+        add_header Content-Type text/plain;
+    }
+
     location /grafana {
         return 301 /grafana/;
     }
