@@ -4,7 +4,15 @@
   become: true
   gather_facts: true
 
+  vars_files:
+    - "../group_vars/secrets.yml"
+
   roles:
     - role: ssh_hardening
     - role: fail2ban
     - role: docker
+    - role: wireguard_server
+    - role: cloudflared_tunnel
+    - role: openresty_compose
+    - role: observability_compose
+    #- role: github_runner_docker

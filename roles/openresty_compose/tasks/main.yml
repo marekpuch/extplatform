@@ -7,6 +7,11 @@
       Define openresty_basic_auth_users in inventory/host_vars/ext_ovh_vps.yml
       before running playbooks/openresty.yml.
 
+- name: Ensure shared Docker network exists
+  community.docker.docker_network:
+    name: external_network
+    state: present
+
 - name: Ensure OpenResty compose project directories exist
   ansible.builtin.file:
     path: "{{ openresty_compose_project_dir }}/{{ item }}"
@@ -42,7 +47,7 @@
     content: "{{ openresty_basic_auth_users | join('\n') ~ '\n' }}"
     owner: root
     group: root
-    mode: "0640"
+    mode: "0644"
 
 - name: Deploy OpenResty index page
   ansible.builtin.template:

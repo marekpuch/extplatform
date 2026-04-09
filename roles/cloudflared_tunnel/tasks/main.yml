@@ -1,0 +1,40 @@
+---
+- name: Refuse deployment if Cloudflare Tunnel token is not configured
+  ansible.builtin.assert:
+    that:
+      - cloudflared_tunnel_token | length > 0
+    fail_msg: >-
+      Define cloudflared_tunnel_token (or openresty_cloudflare_tunnel_token) in inventory
+      before running playbooks.
+
+- name: Ensure cloudflared-tunnel project directory exists
+  ansible.builtin.file:
+    path: "{{ cloudflared_tunnel_project_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Ensure shared Docker network exists
+  community.docker.docker_network:
+    name: "{{ cloudflared_tunnel_network_name }}"
+    state: present
+
+- name: Deploy cloudflared-tunnel docker-compose stack
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ cloudflared_tunnel_project_dir }}/docker-compose.yml"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Start cloudflared-tunnel stack with docker compose
+  ansible.builtin.command:
+    cmd: docker compose up -d
+    chdir: "{{ cloudflared_tunnel_project_dir }}"
+  register: cloudflared_tunnel_up
+  changed_when: >-
+    'Creating' in cloudflared_tunnel_up.stdout or
+    'Recreating' in cloudflared_tunnel_up.stdout or
+    'Starting' in cloudflared_tunnel_up.stdout or
+    'Pulling' in cloudflared_tunnel_up.stdout

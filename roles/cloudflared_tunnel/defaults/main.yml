@@ -1,0 +1,5 @@
+---
+cloudflared_tunnel_project_dir: /opt/compose/cloudflared-tunnel
+cloudflared_tunnel_image: cloudflare/cloudflared:latest
+cloudflared_tunnel_token: "{{ openresty_cloudflare_tunnel_token | default('') }}"
+cloudflared_tunnel_network_name: external_network

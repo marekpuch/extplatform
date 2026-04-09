@@ -4,9 +4,13 @@ services:
     image: {{ openresty_compose_image }}
     container_name: {{ openresty_compose_container_name }}
     restart: unless-stopped
-    ports:
-      - "{{ openresty_compose_port }}:80"
+    networks:
+      - external_network
     volumes:
       - ./conf/default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./auth/users.htpasswd:/etc/nginx/auth/users.htpasswd:ro
       - ./html:/usr/local/openresty/nginx/html:ro
+
+networks:
+  external_network:
+    external: true
