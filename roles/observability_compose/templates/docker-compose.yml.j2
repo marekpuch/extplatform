@@ -16,7 +16,7 @@ services:
       - {{ observability_network_name }}
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:9090/-/healthy"]
-      interval: 30s
+      interval: 60s
       timeout: 10s
       retries: 3
       start_period: 15s
@@ -46,7 +46,7 @@ services:
       - {{ observability_network_name }}
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/health"]
-      interval: 30s
+      interval: 60s
       timeout: 10s
       retries: 3
       start_period: 20s
@@ -68,7 +68,7 @@ services:
       - {{ observability_network_name }}
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:3100/ready"]
-      interval: 30s
+      interval: 60s
       timeout: 10s
       retries: 3
       start_period: 15s
