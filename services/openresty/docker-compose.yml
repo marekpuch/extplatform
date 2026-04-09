@@ -2,7 +2,7 @@
 services:
   openresty:
     image: openresty/openresty:1.27.1.2-0-alpine
-    container_name: openresty-basic-auth
+    container_name: openresty
     restart: unless-stopped
     ports:
       - "80:80"

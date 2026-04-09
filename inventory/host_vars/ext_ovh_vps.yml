@@ -2,7 +2,7 @@
 docker_users:
   - ubuntu
 
-openresty_compose_project_dir: /opt/compose/openresty-basic-auth
+openresty_compose_project_dir: /opt/compose/openresty
 # Add htpasswd-formatted entries before running playbooks/openresty.yml
 # - "admin:$apr1$example$examplehashedpassword"
 openresty_basic_auth_users: []
