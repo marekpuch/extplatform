@@ -23,6 +23,95 @@
     group: root
     mode: "0755"
 
+- name: Render GitHub Runner Dockerfile
+  ansible.builtin.template:
+    src: Dockerfile.j2
+    dest: "{{ github_runner_project_dir }}/Dockerfile"
+    owner: root
+    group: root
+    mode: "0644"
+  register: github_runner_dockerfile
+
+- name: Ensure GitHub Runner work directory exists
+  ansible.builtin.file:
+    path: "{{ github_runner_workdir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Ensure GitHub Runner reuse state directory exists
+  ansible.builtin.file:
+    path: "{{ github_runner_state_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  when: github_runner_reuse_enabled | bool
+
+- name: Preserve existing GitHub Runner registration state for reuse
+  ansible.builtin.shell: |
+    set -euo pipefail
+
+    if [ -f "{{ github_runner_state_dir }}/.runner" ]; then
+      exit 0
+    fi
+
+    if ! docker container inspect github-runner >/dev/null 2>&1; then
+      exit 0
+    fi
+
+    tmpdir="$(mktemp -d)"
+    trap 'rm -rf "$tmpdir"' EXIT
+
+    docker stop github-runner >/dev/null 2>&1 || true
+    docker cp github-runner:/actions-runner/. "$tmpdir/"
+    cp -a "$tmpdir"/.[!.]* "{{ github_runner_state_dir }}/" 2>/dev/null || true
+    cp -a "$tmpdir"/_diag "{{ github_runner_state_dir }}/" 2>/dev/null || true
+    cp -a "$tmpdir"/svc.sh "{{ github_runner_state_dir }}/" 2>/dev/null || true
+
+    echo migrated
+  args:
+    executable: /bin/bash
+  register: github_runner_state_migration
+  changed_when: "'migrated' in github_runner_state_migration.stdout"
+  when: github_runner_reuse_enabled | bool
+
+- name: Restore GitHub Runner configured marker from migrated metadata
+  ansible.builtin.shell: |
+    set -euo pipefail
+
+    if [ -f "{{ github_runner_state_dir }}/.runner" ]; then
+      exit 0
+    fi
+
+    if [ ! -f "{{ github_runner_state_dir }}/.runner_migrated" ]; then
+      exit 0
+    fi
+
+    cp -a "{{ github_runner_state_dir }}/.runner_migrated" "{{ github_runner_state_dir }}/.runner"
+    echo restored
+  args:
+    executable: /bin/bash
+  register: github_runner_marker_restore
+  changed_when: "'restored' in github_runner_marker_restore.stdout"
+  when: github_runner_reuse_enabled | bool
+
+- name: Check for locally built GitHub Runner image
+  ansible.builtin.command:
+    cmd: docker image inspect {{ github_runner_image }}
+  register: github_runner_image_inspect
+  changed_when: false
+  failed_when: false
+
+- name: Build GitHub Runner image with deployment dependencies
+  ansible.builtin.command:
+    cmd: docker build --pull -t {{ github_runner_image }} .
+    chdir: "{{ github_runner_project_dir }}"
+  register: github_runner_image_build
+  changed_when: true
+  when: github_runner_dockerfile.changed or github_runner_image_inspect.rc != 0
+
 - name: Deploy GitHub Runner docker compose stack
   ansible.builtin.template:
     src: docker-compose.yml.j2

@@ -1,0 +1,8 @@
+FROM {{ github_runner_base_image }}
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+{% for package in github_runner_extra_apt_packages %}
+       {{ package }}{% if not loop.last %} \{% endif %}
+{% endfor %}
+    && rm -rf /var/lib/apt/lists/*

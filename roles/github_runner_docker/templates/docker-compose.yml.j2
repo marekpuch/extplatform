@@ -9,6 +9,11 @@ services:
       - "REPO_URL={{ github_runner_repo_url }}"
       - "RUNNER_NAME={{ github_runner_name }}"
       - "RUNNER_LABELS={{ github_runner_labels }}"
+      - "RUNNER_WORKDIR={{ github_runner_workdir }}"
+{% if github_runner_reuse_enabled %}
+      - "CONFIGURED_ACTIONS_RUNNER_FILES_DIR={{ github_runner_configured_files_dir }}"
+      - "DISABLE_AUTOMATIC_DEREGISTRATION={{ 'true' if github_runner_disable_automatic_deregistration else 'false' }}"
+{% endif %}
 {% if github_runner_token %}
       - "RUNNER_TOKEN={{ github_runner_token }}"
 {% endif %}
@@ -20,7 +25,10 @@ services:
 {% endfor %}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /tmp/github-runner:/tmp/github-runner
+      - "{{ github_runner_workdir }}:{{ github_runner_workdir }}"
+{% if github_runner_reuse_enabled %}
+      - "{{ github_runner_state_dir }}:{{ github_runner_configured_files_dir }}"
+{% endif %}
     deploy:
       resources:
         limits:

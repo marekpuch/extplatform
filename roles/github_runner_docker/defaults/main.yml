@@ -1,8 +1,16 @@
 ---
 github_runner_project_dir: /opt/compose/github-runner
-github_runner_image: "myoung34/github-runner:latest"
+github_runner_base_image: "myoung34/github-runner:latest"
+github_runner_image: "extplatform/github-runner:latest"
 github_runner_name: "{{ ansible_hostname }}-runner"
 github_runner_labels: "linux,x64,docker"
+github_runner_workdir: /tmp/github-runner
+github_runner_reuse_enabled: true
+github_runner_configured_files_dir: /runner/data
+github_runner_state_dir: "{{ github_runner_project_dir }}/runner-data"
+github_runner_disable_automatic_deregistration: true
+github_runner_extra_apt_packages:
+  - lftp
 github_runner_repo_url: ""
 github_runner_token: ""
 # Or use GITHUB_ACCESS_TOKEN for auto-refreshing tokens
